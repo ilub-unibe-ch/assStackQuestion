@@ -54,7 +54,9 @@ class stack_cas_connection_unix extends stack_cas_connection_base
 
     protected function call_maxima($command)
     {
-        $env = array('PATH' => getenv('PATH'));
+        $env = array('PATH' => getenv('PATH'),
+                     'LANG' => 'en_US.UTF-8'
+        );
 
         $descriptors = array(
             0 => array('pipe', 'r'),
