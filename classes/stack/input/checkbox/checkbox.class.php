@@ -20,7 +20,7 @@
 // @copyright  2015 University of Edinburgh.
 // @author     Chris Sangwin.
 // @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
-
+require_once(__DIR__ . '/../dropdown/dropdown.class.php');
 
 class stack_checkbox_input extends stack_dropdown_input {
 
