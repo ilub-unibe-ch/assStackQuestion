@@ -200,7 +200,10 @@ class assStackQuestionRenderer
 		return assStackQuestionUtils::_getLatex($question_text);
 	}
 
-	public static function _renderQuestionTextForTestResults(assStackQuestion $question, string $active_id, string $pass): string
+    /**
+     * @throws stack_exception
+     */
+    public static function _renderQuestionTextForTestResults(assStackQuestion $question, string $active_id, string $pass): string
 	{
 		$student_solutions = $question->getTestOutputSolutions($active_id, $pass);
 
@@ -222,6 +225,22 @@ class assStackQuestionRenderer
                 }
             }
             $student_solutions = $old_student_solutions;
+        }
+
+
+        if (isset($student_solutions['inputs']) && is_array($student_solutions['inputs'])) {
+            foreach ($student_solutions['inputs'] as $input_name => $input_info) {
+                if (isset($question->inputs[$input_name]) && is_a(
+                        $question->inputs[$input_name],
+                        'stack_dropdown_input'
+                    )
+                    or is_a($question->inputs[$input_name], 'stack_radio_input')
+                    or is_a($question->inputs[$input_name], 'stack_checkbox_input')) {
+                    $student_solutions['inputs'][$input_name]['value'] = $question->inputs[$input_name]->maxima_to_response_array(
+                        $student_solutions['inputs'][$input_name]['value']
+                    );
+                }
+            }
         }
 
 		$question_text = $student_solutions['question_text'];
@@ -250,16 +269,17 @@ class assStackQuestionRenderer
 		foreach ($input_placeholders as $name) {
 
 			$input_object = $question->inputs[$name];
-			$input_state = $input_object->validate_student_response(array($name => $student_solutions['inputs'][$name]['value']), $question->options, $input_object->get_teacher_answer(), $question->getSecurity());
+
+            $input_state = $input_object->validate_student_response(array($name => $student_solutions['inputs'][$name]['value']), $question->options, $input_object->get_teacher_answer(), $question->getSecurity());
 
 			$field_name = 'xqcas_' . $question->getId() . '_' . $name;
 			//Input Placeholders
 			$question_text = str_replace("[[input:{$name}]]", $question->inputs[$name]->render($input_state, $field_name, true, $student_solutions['inputs'][$name]['correct_value']), $question_text);
-		}
+        }
 
 		//Replace Validation placeholders
 		foreach ($input_placeholders as $name) {
-			$question_text = str_replace("[[validation:{$name}]]", '', $question_text);
+			$question_text = str_replace("[[validation:{$name}]]", $student_solutions['inputs'][$name]['display'], $question_text);
 		}
 
 		//Show all feedback placeholders
