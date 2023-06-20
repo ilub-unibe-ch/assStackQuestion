@@ -1,3 +1,10 @@
+<div alt style="text-align: center; transform: scale(.5);">
+	<picture>
+		<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/surlabs/STACK/ilias7_stack2021/templates/assets/stack-collage.png" />
+		<img alt="STACK" src="https://raw.githubusercontent.com/surlabs/STACK/ilias7_stack2021/templates/assets/stack-collage.png" />
+	</picture>
+</div>
+
 # STACK Question plugin for ILIAS
 
 Welcome to the official repository for [STACK for ILIAS](https://stackforilias.com).
@@ -39,7 +46,8 @@ cdn.mathjax.org or downloaded to your own web server. It has to be configured in
 
 ```bash
 git clone https://github.com/surlabs/STACK.git ./assStackQuestion
-git checkout stack_for_ilias7
+cd assStackQuestion
+git checkout ilias7_stack2021
 ```
 3. STACK uses the ILIAS composer autoloader functionality so, after installing or update the plugin, ensure you run on the ILIAS root folder
 ```bash
@@ -61,7 +69,7 @@ composer du
 **Please, repeat this sequence everytime you update STACK**
 
 # Authors
-* This plugin includes the STACK core classes developed by Chris Sangwin, Matti Harjula and Tim Hunt for its Moodle question type plugin version 4.3.9 (2021).
+* This plugin includes the STACK core classes developed by Chris Sangwin, with support of Matti Harjula and Tim Hunt for its Moodle question type plugin version 4.3.9 (2021).
 * This plugin was developed by Jesús Copado with Fred Neumann's support at the University of Erlangen between 2014 and 2022
 * This plugin is currently maintained by Jesús Copado through its Software development studio [SURLABS](https://surlabs.es)
 
@@ -76,15 +84,22 @@ composer du
 - Instant validation for textareas not working properly
 
 # Version History
-* The stable version 7.0.x for **ILIAS 7.13+** with the STACK Core version 4.3.9 can be found in the Github branch **stack_for_ilias7**
-* The stable version 3.5 for **ILIAS 7.13+** with the STACK Core version 4.2.2 can be found in the Github branch **master-ilias713**
-* The stable version 3.4.3 for **ILIAS <= 7.12** with the STACK Core version 4.2.2 can be found in the Github branch **master-ilias7** is on only security issues mode.
+* The stable version 7.0.x for **ILIAS 7.13+** with the STACK Core version 4.3.9 can be found in the Github branch **ilias7_stack2021**
+* The stable version 3.5 for **ILIAS 7.13+** with the STACK Core version 4.2.2 can be found in the Github branch **ilias7_stack2019** is on only security issues mode.
+* The stable version 3.4.3 for **ILIAS <= 7.12** with the STACK Core version 4.2.2 can be found in the Github branch **ilias7_stack2019_old** is on only security issues mode.
 * The stable version 3.2.x for **ILIAS 6** is no longer maintained.
 * The stable version 3.1.x for **ILIAS 5.4** is no longer maintained
 * The stable version 3.0.x for **ILIAS 5.3** is no longer maintained
 * The stable version 2.4.x for **ILIAS 5.2 to 5.3** is no longer maintained
 * The stable version 2.3.x for **ILIAS 5.0 to 5.1** is no longer maintained
 
+## Version 7.2.6 (2023.06.16)
+- Solves #37456 about extra feedback options not being properly shown in Test results
+## Version 7.2.5 (2023.06.15)
+- Feedback is properly rendered in Test run and Test results when Plots are present in the question or specific feedback fields
+- Variables in Feedback are now properly rendered in Test run and Test results
+- Check answer type related issues are now solved.
+- Deployed Seeds no longer duplicates after question saving
 ## Version 7.2.0 (2023.05.28)
 - Test Results are properly shown for all input types
 - Validation now is shown in Test results' user results

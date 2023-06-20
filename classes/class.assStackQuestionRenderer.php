@@ -311,7 +311,15 @@ class assStackQuestionRenderer
 
 		//Show all feedback placeholders
 		foreach ($feedback_placeholders as $prt_name) {
-			$question_text = str_replace("[[feedback:{$prt_name}]]", $student_solutions['prts'][$prt_name]["feedback"], $question_text);
+            $prt_state = $question->getPrtResult($prt_name, $user_solution, true);
+
+            //Manage LaTeX explicitly
+            $rendered = assStackQuestionUtils::_getLatex(self::renderPRTFeedback($prt_state, $question));
+            if(is_string($rendered)){
+                $question_text = str_replace("[[feedback:{$prt_name}]]", $rendered, $question_text);
+            }else{
+                $question_text = str_replace("[[feedback:{$prt_name}]]", $student_solutions['prts'][$prt_name]["feedback"], $question_text);
+            }
 		}
 
 		//Check for Feedback in specific Feedback section and attach it to the end of the question
@@ -320,7 +328,9 @@ class assStackQuestionRenderer
 		sort($feedback_placeholders_specific_feedback);
 
 		foreach ($feedback_placeholders_specific_feedback as $prt_name) {
-			$question_text .= '</br>'.$student_solutions['prts'][$prt_name]["feedback"];
+            $prt_state = $question->getPrtResult($prt_name, $user_solution, true);
+
+            $question_text .= '</br>'.assStackQuestionUtils::_getLatex(self::renderPRTFeedback($prt_state, $question));
 		}
 
 		//Validation
@@ -414,6 +424,7 @@ class assStackQuestionRenderer
 
 	/**
 	 * Uses $user_solution_from_db -> Test View
+     * Calls maxima
 	 * Renders the Specific Feedback text
 	 * Including all feedback placeholders
 	 * status in db determines feedback class
@@ -426,6 +437,14 @@ class assStackQuestionRenderer
 	{
 		//TST Solutions formatted entries
 		$user_solution_from_db = assStackQuestionUtils::_fromTSTSolutionsToSTACK($user_solution_from_db, $question->getId(), $question->inputs, $question->prts);
+
+        //User answer
+        $user_answer = array();
+        foreach($question->inputs as $input_name => $input){
+            if(isset($user_solution_from_db['inputs'][$input_name]['value'])){
+                $user_answer[$input_name] = $user_solution_from_db['inputs'][$input_name]['value'];
+            }
+        }
 
 		//Specific feedback
 		$text_to_replace = $question->specific_feedback_instantiated;
@@ -450,11 +469,8 @@ class assStackQuestionRenderer
 						$prt_feedback .= '<p>' . $question->prt_incorrect_instantiated . '</p>';
 						$format = '3';
 						break;
-					case '0.5':
-						$prt_feedback .= '<p>' . $question->prt_partially_correct_instantiated . '</p>';
-						break;
 					default:
-						$prt_feedback .= '';
+                        $prt_feedback .= '<p>' . $question->prt_partially_correct_instantiated . '</p>';
 				}
 
 				//Errors & Feedback
@@ -462,10 +478,13 @@ class assStackQuestionRenderer
 				//#35924
 				if (isset($prt_info['feedback']) and is_string($prt_info['feedback'])) {
 
-					$prt_feedback .= assStackQuestionUtils::_getLatex($prt_info['feedback']);
+                    $prt_state = $question->getPrtResult($prt_name, $user_answer, true);
+
+                    //Manage LaTeX explicitly
+                    $prt_feedback .= assStackQuestionUtils::_getLatex(self::renderPRTFeedback($prt_state));
 
 				} else {
-					$prt_feedback = '';
+                    $prt_feedback .= '';
 				}
 
 				//Replace Placeholders
@@ -619,7 +638,7 @@ class assStackQuestionRenderer
 	 * @param stack_potentialresponse_tree_state $prt_state
 	 * @return string HTML Code with the rendered PRT feedback
 	 */
-	public static function renderPRTFeedback(stack_potentialresponse_tree_state $prt_state): string
+	public static function renderPRTFeedback(stack_potentialresponse_tree_state $prt_state, $question = null): string
 	{
 		$feedback = '';
 		$feedback_bits = $prt_state->get_feedback();
@@ -638,6 +657,23 @@ class assStackQuestionRenderer
 					}
 				}
 			}
+
+            if($question !== null){
+                $score = $prt_state->_score;
+                if($score== 1){
+                    $feedback .= $question->prt_correct_instantiated . '<br>';
+                    $format = '2';
+
+                }elseif($score== 0){
+                    $feedback .= $question->prt_incorrect_instantiated . '<br>';
+                    $format = '3';
+
+                }else{
+                    $feedback .= $question->prt_partially_correct_instantiated . '<br>';
+
+                }
+            }
+
 
 			//Substitute Variables in Feedback text
 			$feedback .= self::substituteVariablesInFeedback($prt_state, $feedback_array, $format, 'preview');
