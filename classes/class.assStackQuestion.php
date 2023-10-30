@@ -1779,7 +1779,7 @@ class assStackQuestion extends assQuestion implements iQuestionCondition, ilObjQ
                         $error_message .= html_writer::tag('li', $key);
                     }
                     $s .= html_writer::tag('ul', $error_message);
-                    $this->question_text_instantiated .= $s;
+                    //$this->question_text_instantiated .= $s;
                 }
             }
 
@@ -1941,6 +1941,9 @@ class assStackQuestion extends assQuestion implements iQuestionCondition, ilObjQ
             }
 
             //Validate student response
+            if ($this->getCached('statement-qv') !== null) {
+                $this->inputs[$name]->add_contextsession( new stack_secure_loader($this->getCached('statement-qv'), 'qv'));
+            }
             if (array_key_exists($name, $this->inputs)) {
                 if ($sets_question_object) {
                     $this->setInputStates($this->inputs[$name]->validate_student_response($response, $this->options, $teacher_answer, $this->security, false), $name);
@@ -1983,7 +1986,7 @@ class assStackQuestion extends assQuestion implements iQuestionCondition, ilObjQ
         // Invalid if any input is invalid, ...
         foreach ($this->inputs as $name => $input) {
             if (stack_input::INVALID == $this->getInputState($name, $response)->status) {
-                $this->runtime_errors[] = $this->getInputState($name, $response)->errors;
+                //$this->runtime_errors[] = $this->getInputState($name, $response)->errors;
                 return true;
             }
         }
@@ -1992,7 +1995,7 @@ class assStackQuestion extends assQuestion implements iQuestionCondition, ilObjQ
         foreach ($this->prts as $index => $prt) {
             $result = $this->getPrtResult($index, $response, false);
             if ($result->errors) {
-                $this->runtime_errors[] = $result->errors;
+                //$this->runtime_errors[] = $result->errors;
                 return true;
             }
         }
@@ -2296,7 +2299,7 @@ class assStackQuestion extends assQuestion implements iQuestionCondition, ilObjQ
      * @param string $key
      * @return array|null
      */
-    private function getCached(string $key)
+    public function getCached(string $key)
     {
         // Do we have that particular thing in the cache?
         if ($this->compiled_cache === null || !array_key_exists($key, $this->compiled_cache)) {

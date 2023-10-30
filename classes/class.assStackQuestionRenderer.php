@@ -159,9 +159,9 @@ class assStackQuestionRenderer
 
                     if (is_a($prt_state, 'stack_potentialresponse_tree_state')) {
                         $prt_state->set_cas_context($question->getSession(),$question->getSeed(),true);
-                        $render = self::renderPRTFeedback($prt_state);
+                        $render = self::renderPRTFeedback($prt_state, $question);
                         if(strlen($render)){
-                            $prt_feedback .= self::renderPRTFeedback($prt_state);
+                            $prt_feedback .= $render;
                         }else{
                             foreach ($prt_state->get_feedback() as $feedback){
                                 $prt_feedback .= $feedback->feedback;
@@ -311,6 +311,9 @@ class assStackQuestionRenderer
 
 			$input_object = $question->inputs[$name];
 
+            if ($question->getCached('statement-qv') !== null) {
+                $input_object->add_contextsession(new stack_secure_loader($question->getCached('statement-qv'), 'qv'));
+            }
             $input_state = $input_object->validate_student_response($user_solution, $question->options, $input_object->get_teacher_answer(), $question->getSecurity());
 
 			$field_name = 'xqcas_' . $question->getId() . '_' . $name;
@@ -403,7 +406,6 @@ class assStackQuestionRenderer
 			$evaluation = $question->getEvaluation();
 			$format = '1';
 			$prt_feedback = '';
-
 			switch ($evaluation['points'][$prt_name]['status']) {
 				case 'correct':
 					$prt_feedback .= $question->prt_correct_instantiated;
@@ -429,9 +431,10 @@ class assStackQuestionRenderer
 			} else {
 
 				$prt_state = $evaluation['prts'][$prt_name];
+                $prt_state->set_cas_context($question->getSession(),$question->getSeed(),true);
 
 				//Manage LaTeX explicitly
-				$prt_feedback .= assStackQuestionUtils::_getLatex(self::renderPRTFeedback($prt_state));
+				$prt_feedback .= assStackQuestionUtils::_getLatex(self::renderPRTFeedback($prt_state, $question));
 			}
 
 			//Replace Placeholders
@@ -531,11 +534,8 @@ class assStackQuestionRenderer
 	 * @param assStackQuestion $question
 	 * @return string
 	 */
-	public static function _renderBestSolution(assStackQuestion $question, $test = false): string
+	public static function _renderBestSolution(assStackQuestion $question): string
 	{
-        if($test){
-            exit;
-        }
 		$input_correct_array = $question->getCorrectResponse();
 		$question_text = $question->question_text_instantiated;
 
@@ -698,13 +698,15 @@ class assStackQuestionRenderer
         if ($question !== null and isset($prt_state->_score)) {
             $score = $prt_state->_score;
             if ($score == 1) {
-                $feedback .= $question->prt_correct_instantiated . '<br>';
+                //
+                //$feedback .= $question->prt_correct_instantiated . '<br>';
                 $format = '2';
             } elseif ($score == 0) {
-                $feedback .= $question->prt_incorrect_instantiated . '<br>';
+                //$feedback .= $question->prt_incorrect_instantiated . '<br>';
                 $format = '3';
             } else {
-                $feedback .= $question->prt_partially_correct_instantiated . '<br>';
+                //$feedback .= $question->prt_partially_correct_instantiated . '<br>';
+                $format = '1';
             }
 
             //Substitute Variables in Feedback text
